@@ -404,7 +404,7 @@ $(function() {
 		},
 
         aiStep: function(e) {
-            console.log("AI go beep boop");
+            //console.log("AI go beep boop");
 			this.ai.step();
 		},
 
