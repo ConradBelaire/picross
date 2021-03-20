@@ -406,6 +406,7 @@ $(function() {
         aiStep: function(e) {
             //console.log("AI go beep boop");
 			this.ai.step();
+			this.render();
 		},
 
 		newCustom: function(e) {
