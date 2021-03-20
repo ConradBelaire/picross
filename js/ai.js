@@ -21,12 +21,32 @@ class Ai {
     // Executed whenever the AI Step button is pressed
     step() {
         //console.log("One small step for ai, one giant leap for AIKIND");
-        let hits = [];
+        let guesses = this.wallSqueeze([]);
 
+
+        console.log(guesses);
+        guesses.forEach((item, index) => {
+            this.model.guess(item[0], item[1], item[2]);
+        });
+
+
+        guesses = this.wallPush([]);
+
+
+        console.log(guesses);
+        guesses.forEach((item, index) => {
+            this.model.guess(item[0], item[1], item[2]);
+        });
+
+
+
+    }
+
+    wallSqueeze(guesses) {
         // Check wiggle room for each column
         for (let i=0; i < this.model.get("dimensionWidth"); i++) {
             let w = this.model.get("dimensionHeight") - this.minSpace(this.model.get('hintsY')[i]);
-            console.log(w);
+            //console.log(w);
 
             let len = this.model.get('hintsY')[i].length;
 
@@ -40,7 +60,9 @@ class Ai {
                     let end = start + this.model.get('hintsY')[i][j];
 
                     for (let k = w + start; k < end; k++) {
-                        hits.push([k,i]);
+                        if (guesses.indexOf([k,i,2]) == -1) {
+                            guesses.push([k,i,2]);
+                        }
                     }
                 }
             }
@@ -49,7 +71,7 @@ class Ai {
         // Check wiggle room for each row
         for (let i=0; i < this.model.get("dimensionHeight"); i++) {
             let w = this.model.get("dimensionWidth") - this.minSpace(this.model.get('hintsX')[i]);
-            console.log(w);
+            //console.log(w);
 
             let len = this.model.get('hintsX')[i].length;
 
@@ -63,21 +85,124 @@ class Ai {
                     let end = start + this.model.get('hintsX')[i][j];
 
                     for (let k = w + start; k < end; k++) {
-                        if (hits.indexOf([i,k]) == -1) {
-                            hits.push([i,k]);
+                        if (guesses.indexOf([i,k,2]) == -1) {
+                            guesses.push([i,k,2]);
                         }
                     }
                 }
             }
         }
+        return guesses;
+    }
 
-        console.log(hits);
-        hits.forEach((item, index) => {
-            this.model.guess(item[0], item[1], 2);
-        });
+    wallPush(guesses) {
+
+        // Check any obvious wall pushes for each column
+        for (let col=0; col < this.model.get("dimensionWidth"); col++) {
+
+            let len = this.model.get('hintsY')[col].length;
+
+            //From the front
+            let placeFlag = false;
+            let blockCap = false;
+            let hint = this.model.get('hintsY')[col][0];
+
+            for (let j=0; j < hint; j++) {
+                if (placeFlag) {
+                    guesses.push([j,col,2]);
+                }
+                else if (this.getCell(j, col) == 2 || this.getCell(j, col) == -2) {
+                    placeFlag = true;
+                    if (j == 0) {
+                        blockCap = true;
+                    }
+                }
+            }
+
+            if (blockCap) {
+                guesses.push([hint,col,1]);
+            }
+
+            //From the back
+            placeFlag = false;
+            blockCap = false;
+            hint = this.model.get('hintsY')[col][len-1];
+            let max = this.model.get("dimensionWidth");
+
+            for (let j=max-1; j > max-hint-1; j--) {
+                if (placeFlag) {
+                    guesses.push([j,col,2]);
+                }
+                else if (this.getCell(j, col) == 2 || this.getCell(j, col) == -2) {
+                    placeFlag = true;
+                    if (j == max-1) {
+                        blockCap = true;
+                    }
+                }
+            }
+
+            if (blockCap) {
+                guesses.push([max-hint-1,col,1]);
+            }
 
 
+        }
 
+        // Check any obvious wall pushes for each row
+
+
+        // Check any obvious wall pushes for each column
+        for (let row=0; row < this.model.get("dimensionHeight"); row++) {
+
+            let len = this.model.get('hintsX')[row].length;
+
+            //From the front
+            let placeFlag = false;
+            let blockCap = false;
+            let hint = this.model.get('hintsX')[row][0];
+
+            for (let j=0; j < hint; j++) {
+                if (placeFlag) {
+                    guesses.push([row,j,2]);
+                }
+                else if (this.getCell(row, j) == 2 || this.getCell(row, j) == -2) {
+                    placeFlag = true;
+                    if (j == 0) {
+                        blockCap = true;
+                    }
+                }
+            }
+
+            if (blockCap) {
+                guesses.push([row,hint,1]);
+            }
+
+            //From the back
+            placeFlag = false;
+            blockCap = false;
+            hint = this.model.get('hintsX')[row][len-1];
+            let max = this.model.get("dimensionHeight");
+
+            for (let j=max-1; j > max-hint-1; j--) {
+                if (placeFlag) {
+                    guesses.push([row,j,2]);
+                }
+                else if (this.getCell(row,j) == 2 || this.getCell(row,j) == -2) {
+                    placeFlag = true;
+                    if (j == max-1) {
+                        blockCap = true;
+                    }
+                }
+            }
+
+            if (blockCap) {
+                guesses.push([row,max-hint-1,1]);
+            }
+
+
+        }
+
+        return guesses;
     }
 
     getRow(i) {
