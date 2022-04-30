@@ -1,3 +1,6 @@
+This is a fork of https://github.com/liouh/picross to try and implement an AI to solve it.
+The website itself is not mine! Just the "Solve" button.
+
 Picross
 =======
 
